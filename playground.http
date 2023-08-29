@@ -1,0 +1,143 @@
+# This file is VSCode specific
+# you must have "humao.rest-client" extension installed.
+
+@host = http://localhost:4000
+
+### Create new user
+POST {{host}}/v1/users
+Content-Type: application/json
+
+{
+    "name": "Alice Smith",
+    "email": "alice@example.com",
+    "password": "pa55word"
+}
+
+### Activate user
+PUT {{host}}/v1/activated
+Content-Type: application/json
+
+{"token": "IKAYWZ3EXXQLPXSIRHCBDHQH3U"}
+
+### Get Authentication Token
+# @name getAuthToken
+POST {{host}}/v1/tokens/authentication
+Content-Type: application/json
+
+{
+    "email": "alice@example.com",
+    "password": "pa55word"
+}
+
+### Get a specific movie
+GET {{host}}/v1/movies/1
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+
+### Grant permissions to a user
+PUT {{host}}/v1/users/3/permissions
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{"permissions": ["movies:write"]}
+
+### Malformed JSON
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{"title": "Moana",}
+
+### Type mismatch
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{"title": 123}
+
+### Multiple JSON values
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{"title": "Moana"}{"title": "Top Gun"}
+
+### Unknown fields
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{
+    "title": "Moana", 
+    "rating":"PG"
+}
+
+### Very large JSON body
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+< assets/largefile.json
+
+### Does not meet the rules
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{
+    "year": 2024,
+    "runtime": -1,
+    "genres": []
+}
+
+### OK Request
+POST {{host}}/v1/movies
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{
+    "title": "Fight Club",
+    "year": 1999,
+    "runtime": 139,
+    "genres": [
+        "drama",
+        "crime",
+        "comedy"
+    ]
+}
+
+### Does not meet the rules
+GET {{host}}/v1/movies
+?title=
+&genres=
+&sort=genres
+&page=1.2
+&page_size=-1
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+
+### List all movie
+GET {{host}}/v1/movies
+?title=
+&genres=drama
+&sort=runtime
+&page=4
+&page_size=3
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+
+### Partial update a movie
+PATCH {{host}}/v1/movies/15
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
+Content-Type: application/json
+
+{
+    "year": 1999
+}
+
+### List users
+GET {{host}}/v1/users
+?email=
+&name=
+&permission=
+&sort=
+&page=
+&page_size=
+Authorization: Bearer {{getAuthToken.response.body.authentication_token.token}}
